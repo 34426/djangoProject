@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <!--start page wrapper -->
+    <div class="page-wrapper">
+        <div class="page-content">
+            <!--breadcrumb-->
+            <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+                <div class="breadcrumb-title pe-3">数据分析</div>
+                <div class="ps-3">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0 p-0">
+                            <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">数据描述性分析</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+            <!--end breadcrumb-->
+            <h6 class="mb-0 text-uppercase">数据分析</h6>
+            <hr/>
+            <div class="row row-cols-md-2">
+                <div class="col">
+                    <div class="card radius-10 ">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h5 class="mb-0">商品品牌分布</h5>
+                                </div>
+
+                            </div>
+                            <div id="w-chart1" style="width: 100%;height: 300px"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card radius-10">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h5 class="mb-0">店铺商品数量</h5>
+                                </div>
+
+                            </div>
+                            <div id="w-chart2" style="width: 100%;height: 300px"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card radius-10">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h5 class="mb-0">价格区间统计</h5>
+                                </div>
+                                <div class="dropdown ms-auto">
+                                    <div class="dropdown-toggle dropdown-toggle-nocaret cursor-pointer"
+                                         data-bs-toggle="dropdown"><i class='bx bx-dots-horizontal-rounded font-22'></i>
+                                    </div>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="javascript:;">Action</a>
+                                        </li>
+                                        <li><a class="dropdown-item" href="javascript:;">Another action</a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="javascript:;">Something else here</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="" id="w-chart3" style="width: 100%;height: 300px"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card radius-10">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h5 class="mb-0">评论量区间统计（总评数）</h5>
+                                </div>
+                                <div class="dropdown ms-auto">
+                                    <div class="dropdown-toggle dropdown-toggle-nocaret cursor-pointer"
+                                         data-bs-toggle="dropdown"><i class='bx bx-dots-horizontal-rounded font-22'></i>
+                                    </div>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="javascript:;">Action</a>
+                                        </li>
+                                        <li><a class="dropdown-item" href="javascript:;">Another action</a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="javascript:;">Something else here</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="" id="w-chart4" style="width: 100%;height: 300px"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <!--end page wrapper -->
+{% endblock %}
+{% block jss %}
+    <script src="/static/assets/js/bootstrap.bundle.min.js"></script>
+    <!--plugins-->
+    <script src="/static/assets/js/jquery.min.js"></script>
+
+    <script src="/static/assets/js/echarts.js"></script>
+
+    <script src="/static/assets/plugins/simplebar/js/simplebar.min.js"></script>
+    <script src="/static/assets/plugins/metismenu/js/metisMenu.min.js"></script>
+    <script src="/static/assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+    <script src="/static/assets/plugins/apexcharts-bundle/js/apexcharts.min.js"></script>
+    {#	<script src="/static/assets/js/widgets.js"></script>#}
+    <!--app JS-->
+    <script src="/static/assets/js/app.js"></script>
+    <script>
+        // ========== 1. 商品品牌分布（动态数据） ==========
+        var myChart = echarts.init(document.getElementById('w-chart1'));
+        var brandData = {{ brand_data|safe }};
+        var option = {
+            legend: {show: true, orient: "horizontal", left: "center"},
+            tooltip: {trigger: "item", axisPointer: {type: "shadow"}},
+            color: ["#17a00e", "#f27935", "#ff9000", "#bfef45", "#36a2eb", "#ff7f50", "#6495ed", "#fff8dc", "#dc143c", "#00ffff", "#00008b", "#008b8b"],
+            series: [{
+                radius: ["20%", "70%"],
+                data: brandData,
+                type: "treemap",
+                roseType: "radius",
+                label: {show: true},
+                labelLine: {show: false}
+            }]
+        };
+        myChart.setOption(option);
+
+        var myChart2 = echarts.init(document.getElementById('w-chart2'));
+// 接收视图传递的模拟数据店铺统计结果
+var shopData = {{ shop_data|safe }};
+var option2 = {
+    legend: {show: true, orient: "vertical", left: "center"},
+    tooltip: {trigger: "axis", axisPointer: {type: "shadow"}},
+    series: [{
+        id: 1724292880094,
+        data: shopData,  // 替换硬编码数据为动态变量
+        type: "bar",
+        showBackground: false,
+        itemStyle: {color: "rgba(19,152,168,0.47)",},
+        label: {show: false},
+    }],
+    xAxis: {
+        type: "category",
+        data: shopData.map(item => item.name),  // 动态提取模拟数据中的店铺名称
+        axisLabel: {
+            interval: 0,
+            rotate: 0,
+            fontSize: 12,
+            margin: 8,
+            lineHeight: 14,
+            formatter: function (value) {
+                var ret = '';
+                var maxLength = 8;
+                var rowNumber = Math.ceil(value.length / maxLength);
+                if (rowNumber > 1) {
+                    for (var i = 0; i < rowNumber; i++) {
+                        var temp = '';
+                        temp = value.substring(i * maxLength, Math.min((i + 1) * maxLength, value.length));
+                        ret += temp;
+                        if (i < rowNumber - 1) {
+                            ret += '\n';
+                        }
+                    }
+                    return ret;
+                } else {
+                    return value;
+                }
+            }
+        }
+    },
+    yAxis: {type: "value"},
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '20%',
+        containLabel: true
+    }
+}
+myChart2.setOption(option2);
+
+        var myChart3 = echarts.init(document.getElementById('w-chart3'));
+// 接收视图传递的价格区间统计数据（真实+模拟合并）
+var priceData = {{ price_data|safe }};
+var option3 = {
+    legend: {show: true, orient: "horizontal", left: "center"},
+    tooltip: {trigger: "item", axisPointer: {type: "shadow"}},
+    color: ["#83db80", "#f2e235", "#ff9000", "#bfef45", "#36a2eb", "#ff7f50", "#6495ed", "#fff8dc", "#dc143c", "#00ffff", "#00008b", "#008b8b"],
+    series: [{
+        radius: ["20%", "70%"],
+        data: priceData,  // 替换硬编码数据为动态变量
+        type: "pie",
+        roseType: "radius",
+        label: {show: true},
+        labelLine: {show: false}
+    }]
+}
+myChart3.setOption(option3);
+
+        var myChart4 = echarts.init(document.getElementById('w-chart4'));
+// 接收无需清洗的万级评论数区间数据（真实+模拟合并）
+var commentRangeData = {{ comment_range_data|safe }};
+var option4 = {
+    legend: {show: true, orient: "vertical", left: "center"},
+    tooltip: {trigger: "axis", axisPointer: {type: "shadow"}},
+    series: [{
+        id: 1724292880094,
+        data: commentRangeData,  // 替换为动态统计数据
+        type: "bar",
+        showBackground: false,
+        itemStyle: {color: "#ff9000",},
+        label: {show: false},
+    }],
+    xAxis: {
+        type: "category",
+        data: commentRangeData.map(item => item.name),  // 动态显示万级区间名称
+        axisLabel: {
+            interval: 0,
+            fontSize: 12
+        }
+    },
+    yAxis: {type: "value"},
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    }
+}
+myChart4.setOption(option4);
+    </script>
+
+{% endblock %}
+

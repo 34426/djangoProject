@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block content %}
+    <style>
+        .progress-bar-custom {
+            height: 6px;
+        }
+        .progress-width-0 { width: 0%; }
+        .progress-width-10 { width: 10%; }
+        .progress-width-20 { width: 20%; }
+        .progress-width-30 { width: 30%; }
+        .progress-width-40 { width: 40%; }
+        .progress-width-50 { width: 50%; }
+        .progress-width-60 { width: 60%; }
+        .progress-width-70 { width: 70%; }
+        .progress-width-80 { width: 80%; }
+        .progress-width-90 { width: 90%; }
+        .progress-width-100 { width: 100%; }
+    </style>
+    <!--end header -->
+    <!--start page wrapper -->
+    <div class="page-wrapper">
+        <div class="page-content">
+            <!-- 数据卡片 -->
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3">
+                <div class="col">
+                    <div class="card radius-10 border-start border-0 border-3 border-info">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <p class="mb-0 text-secondary">数据量</p>
+                                    <h4 class="my-1 text-info">{{ total_all_data }}</h4>
+                                    <p class="mb-0 font-13">数据来源：京东</p>
+                                </div>
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-scooter text-white ms-auto"><i class='bx bxs-cart'></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card radius-10 border-start border-0 border-3 border-danger">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <p class="mb-0 text-secondary">评论数据量</p>
+                                    <h4 class="my-1 text-danger">{{ processed_data_count }}</h4>
+                                    <p class="mb-0 font-13">处理工具：Pandas</p>
+                                </div>
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-bloody text-white ms-auto"><i class='bx bxs-wallet'></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card radius-10 border-start border-0 border-3 border-success">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <p class="mb-0 text-secondary">分析图表数量</p>
+                                    <h4 class="my-1 text-success">34</h4>
+                                    <p class="mb-0 font-13">分析工具：Pandas</p>
+                                </div>
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-ohhappiness text-white ms-auto"><i class='bx bxs-bar-chart-alt-2'></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!--end row-->
+
+            <!-- 销量数据排行 -->
+            <div class="card radius-10 mt-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h6 class="mb-0">销量数据排行</h6>
+                        </div>
+                        <div class="dropdown ms-auto">
+                            <a class="dropdown-toggle dropdown-toggle-nocaret" href="#" data-bs-toggle="dropdown"></a>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>商品名</th>
+                                <th>图片</th>
+                                <th>店铺</th>
+                                <th>品牌</th>
+                                <th>价格</th>
+                                <th>销量</th>
+                                <th>好评率</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for product in products %}
+                                <tr>
+                                    <td>{{ product.product_name }}</td>
+                                    <td><img src="{{ product.img_url }}" class="product-img-2" alt="product img"></td>
+                                    <td>{{ product.shop }}</td>
+                                    <td><span class="badge bg-gradient-quepal text-white shadow-sm w-100">{{ product.brand }}</span></td>
+                                    <td>{{ product.price }}</td>
+                                    <td>{{ product.CommentCountStr }}</td>
+                                    <td>
+                                        {% comment %} 修复：移除multiply过滤器，改用后端传递的百分比 {% endcomment %}
+                                        {% with good_rate_str=product.GoodRate|default:"0" %}
+                                            {% if good_rate_str|length > 0 %}
+                                                {% with good_rate=good_rate_str|floatformat:2 %}
+                                                    {% if good_rate != "" %}
+                                                        {% comment %} 直接计算百分比（小数×100，用字符串拼接实现） {% endcomment %}
+                                                        {% with percentage=good_rate|stringformat:"f" %}
+                                                            {% with rate_num=percentage|cut:"0." %}  <!-- 提取小数部分（如0.97→97） -->
+                                                                {% if rate_num|length == 1 %}  <!-- 处理0.9→90%的情况 -->
+                                                                    {% with rate_num=rate_num|add:"0" %}
+                                                                        <div class="progress progress-bar-custom">
+                                                                            <div class="progress-bar bg-gradient-quepal" role="progressbar" style="width: {{ rate_num }}%"></div>
+                                                                        </div>
+                                                                        {{ rate_num }}%
+                                                                    {% endwith %}
+                                                                {% else %}
+                                                                    <div class="progress progress-bar-custom">
+                                                                        <div class="progress-bar bg-gradient-quepal" role="progressbar" style="width: {{ rate_num }}%"></div>
+                                                                    </div>
+                                                                    {{ rate_num }}%
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        {% endwith %}
+                                                    {% else %}
+                                                        <div class="progress progress-bar-custom">
+                                                            <div class="progress-bar bg-gradient-quepal" role="progressbar" style="width: 0%"></div>
+                                                        </div>
+                                                        0%
+                                                    {% endif %}
+                                                {% endwith %}
+                                            {% else %}
+                                                <div class="progress progress-bar-custom">
+                                                    <div class="progress-bar bg-gradient-quepal" role="progressbar" style="width: 0%"></div>
+                                                </div>
+                                                0%
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/assets/js/jquery.min.js"></script>
+{% endblock %}

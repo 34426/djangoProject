@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">销量数据预测</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a></li>
+                        <li class="breadcrumb-item active" aria-current="page">销量预测</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="ms-auto">
+                <button type="button" class="btn btn-outline-primary px-3" data-bs-toggle="modal" data-bs-target="#historyModal">
+                    <i class="bx bx-history me-1"></i>历史记录
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-7 mx-auto">
+                <div class="text-center mb-4">
+                    <h4 class="mb-0 text-uppercase fw-bold text-primary">
+                        <i class="bx bx-bar-chart-alt-2 me-2"></i>输入想要预测的商品信息
+                    </h4>
+                    <div class="small text-muted">请填写下方表单以获取销量预测结果</div>
+                </div>
+                <hr class="mb-4"/>
+                <div class="card border-top border-0 border-4 border-primary shadow-sm">
+                    <div class="card-body p-5">
+                        <!-- 新增表单验证和加载状态 -->
+                        <form class="row g-3" method="post" action="{% url 'predict' %}" id="predictionForm">
+                            {% csrf_token %}
+
+                            <!-- 品牌选择（与后端编码一致） -->
+                            <div class="col-md-6">
+                                <label for="brand" class="form-label">商品品牌 <span class="text-danger">*</span></label>
+                                <select id="brand" name="brand" class="form-select" required>
+                                    <option value="">选择品牌...</option>
+                                    <option value="荣耀">荣耀（HONOR）</option>
+                                    <option value="华为">华为（HUAWEI）</option>
+                                    <option value="小米">小米（MI）</option>
+                                    <option value="vivo">vivo</option>
+                                    <option value="真我">真我（realme）</option>
+                                    <option value="OPPO">OPPO</option>
+                                </select>
+                                <div class="invalid-feedback">请选择商品品牌</div>
+                            </div>
+
+                            <!-- 好评率（限制0-1范围） -->
+                            <div class="col-md-6">
+                                <label for="rating" class="form-label">好评率 <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0" max="1"
+                                       class="form-control" id="rating" name="rating"
+                                       placeholder="如: 0.95" required>
+                                <div class="invalid-feedback">请输入0-1之间的数值</div>
+                            </div>
+
+                            <!-- 价格（限制正数） -->
+                            <div class="col-md-6">
+                                <label for="price" class="form-label">商品价格 <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0"
+                                       class="form-control" id="price" name="price"
+                                       placeholder="如: 2099" required>
+                                <div class="invalid-feedback">请输入有效的价格（正数）</div>
+                            </div>
+
+                            <!-- 平均得分（限制1-5范围） -->
+                            <div class="col-md-6">
+                                <label for="average_score" class="form-label">平均得分 <span class="text-danger">*</span></label>
+                                <input type="number" step="0.1" min="1" max="5"
+                                       class="form-control" id="average_score" name="average_score"
+                                       value="4.5" placeholder="范围1-5" required>
+                                <div class="invalid-feedback">请输入1-5之间的评分</div>
+                            </div>
+
+                            <div class="col-12 text-center mt-4">
+                                <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill" id="predictBtn">
+                                    <i class="bx bx-analyse me-1"></i>开始预测
+                                </button>
+                                <!-- 加载动画（默认隐藏） -->
+                                <div class="spinner-border text-primary ms-3 d-none" id="loadingSpinner" role="status">
+                                    <span class="visually-hidden">加载中...</span>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 预测结果展示 -->
+                {% if result %}
+                <div class="mt-4 text-center">
+                    <div class="card border-0 bg-light shadow-sm">
+                        <div class="card-body p-4">
+                            <h5 class="text-uppercase mb-2">预测结果</h5>
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="display-6 fw-bold
+                                    {% if result == '超高销量' %}text-success
+                                    {% elif result == '高销量' %}text-primary
+                                    {% elif result == '中等销量' %}text-warning
+                                    {% else %}text-danger{% endif %}">
+                                    {{ result }}
+                                </div>
+                                <i class="bx
+                                    {% if result == '超高销量' %}bx-trending-up text-success
+                                    {% elif result == '高销量' %}bx-line-chart-up text-primary
+                                    {% elif result == '中等销量' %}bx-trending-up text-warning
+                                    {% else %}bx-trending-down text-danger{% endif %}
+                                    ms-2 fs-2"></i>
+                            </div>
+                            <!-- 新增结果解释 -->
+                            <div class="mt-3 text-muted small">
+                                <p>基于商品信息预测，该商品销量区间为 <strong>{{ result }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                <hr class="mt-4"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 历史记录模态框 -->
+<div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="historyModalLabel">
+                    <i class="bx bx-history me-1"></i> 预测历史记录
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>商品品牌</th>
+                                <th>价格</th>
+                                <th>好评率</th>
+                                <th>平均得分</th>
+                                <th>预测结果</th>
+                                <th>预测时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="bx bx-info-circle fs-4 mb-2 d-block"></i>
+                                        暂无预测历史记录
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="clearHistoryBtn">清除历史</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if result %}
+<script id="resultData" type="application/json">
+{
+    "brand": "{{ request.POST.brand }}",
+    "price": "{{ request.POST.price }}",
+    "rating": "{{ request.POST.rating }}",
+    "average_score": "{{ request.POST.average_score }}",
+    "result": "{{ result }}"
+}
+</script>
+{% endif %}
+
+{% block custom_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('predictionForm');
+        const predictBtn = document.getElementById('predictBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        // 表单提交前验证
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // 品牌验证
+            const brand = document.getElementById('brand');
+            if (!brand.value) {
+                brand.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                brand.classList.remove('is-invalid');
+            }
+
+            // 好评率验证（0-1）
+            const rating = document.getElementById('rating');
+            if (rating.value < 0 || rating.value > 1) {
+                rating.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                rating.classList.remove('is-invalid');
+            }
+
+            // 价格验证（正数）
+            const price = document.getElementById('price');
+            if (price.value <= 0) {
+                price.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                price.classList.remove('is-invalid');
+            }
+
+            // 平均得分验证（1-5）
+            const avgScore = document.getElementById('average_score');
+            if (avgScore.value < 1 || avgScore.value > 5) {
+                avgScore.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                avgScore.classList.remove('is-invalid');
+            }
+
+            // 阻止无效表单提交，并显示加载状态
+            if (!isValid) {
+                e.preventDefault();
+                return;
+            }
+
+            // 显示加载动画，禁用按钮
+            predictBtn.disabled = true;
+            loadingSpinner.classList.remove('d-none');
+        });
+
+        // 保存预测结果到本地存储
+        const resultDataElem = document.getElementById('resultData');
+        if (resultDataElem) {
+            try {
+                const currentPrediction = JSON.parse(resultDataElem.textContent);
+                // 格式化时间（年-月-日 时:分:秒）
+                const now = new Date();
+                currentPrediction.created_at = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+
+                let history = JSON.parse(localStorage.getItem('prediction_history')) || [];
+                history.unshift(currentPrediction); // 最新记录放前面
+
+                // 限制最多保存30条历史
+                if (history.length > 30) {
+                    history = history.slice(0, 30);
+                }
+
+                localStorage.setItem('prediction_history', JSON.stringify(history));
+            } catch (e) {
+                console.error('保存预测历史失败:', e);
+            }
+        }
+
+        // 历史记录模态框
+        const historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+        // 打开模态框时加载历史记录
+        document.querySelector('[data-bs-target="#historyModal"]').addEventListener('click', function() {
+            setTimeout(() => { // 等待模态框渲染完成
+                const history = JSON.parse(localStorage.getItem('prediction_history')) || [];
+                const tableBody = document.getElementById('historyTableBody');
+
+                if (history.length > 0) {
+                    let html = '';
+                    history.forEach((item, index) => {
+                        // 结果标签样式
+                        let resultClass = 'bg-danger';
+                        if (item.result === '超高销量') resultClass = 'bg-success';
+                        else if (item.result === '高销量') resultClass = 'bg-primary';
+                        else if (item.result === '中等销量') resultClass = 'bg-warning';
+
+                        html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.brand}</td>
+                            <td>¥${parseFloat(item.price).toFixed(2)}</td>
+                            <td>${(parseFloat(item.rating) * 100).toFixed(1)}%</td>
+                            <td>${item.average_score}</td>
+                            <td><span class="badge rounded-pill ${resultClass}">${item.result}</span></td>
+                            <td>${item.created_at}</td>
+                        </tr>`;
+                    });
+                    tableBody.innerHTML = html;
+                } else {
+                    tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="bx bx-info-circle fs-4 mb-2 d-block"></i>
+                                暂无预测历史记录
+                            </div>
+                        </td>
+                    </tr>`;
+                }
+            }, 100);
+        });
+
+        // 清除历史记录
+        clearHistoryBtn.addEventListener('click', function() {
+            if (confirm('确定要清除所有预测历史记录吗？此操作不可恢复。')) {
+                localStorage.removeItem('prediction_history');
+                document.getElementById('historyTableBody').innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <div class="text-muted">
+                            <i class="bx bx-info-circle fs-4 mb-2 d-block"></i>
+                            暂无预测历史记录
+                        </div>
+                    </td>
+                </tr>`;
+                alert('历史记录已成功清除');
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

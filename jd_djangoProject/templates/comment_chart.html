@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <div class="page-wrapper">
+        <div class="page-content">
+
+            <div class="row row-cols-1 row-cols-lg-3">
+                <div class="col d-flex">
+                    <div class="card radius-10 w-100">
+                        <div class="card-header bg-transparent">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h6 class="mb-0">评论时间分布</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="font-weight-bold mb-1 text-secondary">近五个月数据</p>
+                            <div class="chart-container-0">
+                                <canvas id="chart3"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col d-flex">
+                    <div class="card radius-10 w-100">
+                        <div class="card-header bg-transparent">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h6 class="mb-0">评论情感分布</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container-1">
+                                <canvas id="chart4"></canvas>
+                            </div>
+
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
+                                    好评 <span class="badge bg-success rounded-pill">{{ total_good }}</span>
+                                </li>
+                                <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
+                                    中评 <span class="badge bg-warning rounded-pill">{{ total_mid }}</span>
+                                </li>
+                                <li class="list-group-item d-flex bg-transparent justify-content-between align-items-center">
+                                    差评 <span class="badge bg-danger rounded-pill">{{ total_bad }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col d-flex">
+                    <div class="card radius-10 w-100">
+                        <div class="card-header bg-transparent">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h6 class="mb-0">不同品牌手机评论情感对比</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container-0">
+                                <canvas id="chart5"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="row">
+                <div class="col-12 col-lg-7 col-xl-12 d-flex">
+                    <div class="card radius-10 w-100">
+                        <div class="card-header bg-transparent">
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <h6 class="mb-0">词云图</h6>
+                                </div>
+                                <div class="dropdown ms-auto">
+                                    <a class="dropdown-toggle dropdown-toggle-nocaret" href="#"
+                                       data-bs-toggle="dropdown"><i
+                                            class='bx bx-dots-horizontal-rounded font-22 text-option'></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="javascript:;">Action</a>
+                                        </li>
+                                        <li><a class="dropdown-item" href="javascript:;">Another action</a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li><a class="dropdown-item" href="javascript:;">Something else here</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-7 col-xl-8 border-end">
+                                    <div id="geographic-map-2"></div>
+                                </div>
+                                <div class="col-lg-5 col-xl-4">
+
+                                    <div class="mb-4">
+                                        <p class="mb-2"> 外观 <span class="float-end">70%</span></p>
+                                        <div class="progress" style="height: 7px;">
+                                            <div class="progress-bar bg-primary progress-bar-striped" role="progressbar"
+                                                 style="width: 70%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <p class="mb-2">运行速度 <span class="float-end">65%</span></p>
+                                        <div class="progress" style="height: 7px;">
+                                            <div class="progress-bar bg-danger progress-bar-striped" role="progressbar"
+                                                 style="width: 65%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <p class="mb-2">屏幕 <span class="float-end">60%</span></p>
+                                        <div class="progress" style="height: 7px;">
+                                            <div class="progress-bar bg-success progress-bar-striped" role="progressbar"
+                                                 style="width: 60%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <p class="mb-2">续航<span class="float-end">55%</span></p>
+                                        <div class="progress" style="height: 7px;">
+                                            <div class="progress-bar bg-warning progress-bar-striped" role="progressbar"
+                                                 style="width: 55%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <p class="mb-2">快递 <span class="float-end">50%</span></p>
+                                        <div class="progress" style="height: 7px;">
+                                            <div class="progress-bar bg-info progress-bar-striped" role="progressbar"
+                                                 style="width: 50%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-0">
+                                        <p class="mb-2">服务 <span class="float-end">45%</span></p>
+                                        <div class="progress" style="height: 7px;">
+                                            <div class="progress-bar bg-dark progress-bar-striped" role="progressbar"
+                                                 style="width: 45%"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% block jss %}
+        <script src="/static/assets/plugins/chartjs/js/Chart.min.js"></script>
+        <script src="/static/assets/plugins/chartjs/js/Chart.extension.js"></script>
+
+        <script>
+            // chart 3（保持不变）
+            var ctx = document.getElementById('chart3').getContext('2d');
+
+            var gradientStroke1 = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientStroke1.addColorStop(0, '#008cff');
+            gradientStroke1.addColorStop(1, 'rgba(22, 195, 233, 0.1)');
+
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['五月', '六月', '七月', '八月', '九月'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [3, 30, 10, 10, 22, 12, 5],
+                        pointBorderWidth: 2,
+                        pointHoverBackgroundColor: gradientStroke1,
+                        backgroundColor: gradientStroke1,
+                        borderColor: gradientStroke1,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'bottom',
+                        display: false
+                    },
+                    tooltips: {
+                        displayColors: false,
+                        mode: 'nearest',
+                        intersect: false,
+                        position: 'nearest',
+                        xPadding: 10,
+                        yPadding: 10,
+                        caretPadding: 10
+                    }
+                }
+            });
+
+
+            // chart 4（修改为好评/中评/差评，使用后端数据）
+            var ctx = document.getElementById("chart4").getContext('2d');
+
+            // 好评-绿色渐变
+            var gradientGood = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientGood.addColorStop(0, '#28a745');
+            gradientGood.addColorStop(1, '#218838');
+
+            // 中评-黄色渐变
+            var gradientMid = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientMid.addColorStop(0, '#ffc107');
+            gradientMid.addColorStop(1, '#e0a800');
+
+            // 差评-红色渐变
+            var gradientBad = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientBad.addColorStop(0, '#dc3545');
+            gradientBad.addColorStop(1, '#c82333');
+
+            var myChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ["好评", "中评", "差评"],  // 替换为好评/中评/差评
+                    datasets: [{
+                        backgroundColor: [
+                            gradientGood,
+                            gradientMid,
+                            gradientBad
+                        ],
+                        hoverBackgroundColor: [
+                            gradientGood,
+                            gradientMid,
+                            gradientBad
+                        ],
+                        data: [{{ total_good }}, {{ total_mid }}, {{ total_bad }}],  // 使用后端数据
+                        borderWidth: [1, 1, 1]
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    cutoutPercentage: 0,
+                    legend: {
+                        position: 'bottom',
+                        display: false,
+                        labels: {
+                            boxWidth: 8
+                        }
+                    },
+                    tooltips: {
+                        displayColors: false,
+                        // 显示数量和百分比
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    },
+                }
+            });
+
+
+            // chart 5（修改为好评/差评对比，使用后端数据）
+            var ctx = document.getElementById("chart5").getContext('2d');
+
+            // 好评-绿色渐变
+            var gradientGood = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientGood.addColorStop(0, '#28a745');
+            gradientGood.addColorStop(1, '#218838');
+
+            // 差评-红色渐变
+            var gradientBad = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientBad.addColorStop(0, '#dc3545');
+            gradientBad.addColorStop(1, '#c82333');
+
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: {{ brand_list|safe }},  // 后端传递的品牌列表
+                    datasets: [{
+                        label: '好评',  // 替换为"好评"
+                        data: {{ brand_good|safe }},  // 后端传递的各品牌好评数
+                        borderColor: gradientGood,
+                        backgroundColor: gradientGood,
+                        hoverBackgroundColor: gradientGood,
+                        pointRadius: 0,
+                        fill: true,
+                        borderWidth: 1
+                    }, {
+                        label: '差评',  // 替换为"差评"
+                        data: {{ brand_bad|safe }},  // 后端传递的各品牌差评数
+                        borderColor: gradientBad,
+                        backgroundColor: gradientBad,
+                        hoverBackgroundColor: gradientBad,
+                        pointRadius: 0,
+                        fill: true,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: 'bottom',
+                        display: true,
+                        labels: {
+                            boxWidth: 8
+                        }
+                    },
+                    scales: {
+                        xAxes: [{
+                            barPercentage: .5
+                        }]
+                    },
+                    tooltips: {
+                        displayColors: true,  // 显示颜色标识区分好评/差评
+                    }
+                }
+            });
+        </script>
+
+        <!-- 词云图部分保持不变 -->
+        <script src="/static/assets/js/echarts.min.js"></script>
+        <script src="/static/assets/js/echarts-wordcloud.min.js"></script>
+        <script>
+            // 使用返回的数据更新 ECharts 图表
+            var myChart = echarts.init(document.getElementById('geographic-map-2'));
+
+            var option = {
+                tooltip: {
+                    show: true,  // 显示提示框
+                    trigger: 'item',  // 触发类型，'item' 表示鼠标悬停在数据项上时触发
+                },
+                series: [{
+                    type: 'wordCloud',  //类型为字符云
+                    shape: 'circle',  //平滑 椭圆:ellipse 圆形:circle
+                    gridSize: 4,    //网格尺寸
+                    size: ['100%', '100%'],
+                    sizeRange: [20, 100],
+                    rotationRange: [0, 30], //旋转范围
+                    textStyle: {
+                        // 将 "normal" 改为 "font"
+                        fontFamily: 'sans-serif',
+
+                        // 对应的字体和阴影设置在这里
+                        emphasis: {
+                            focus: 'self',  // 仅在悬停的元素上应用强调
+                            textStyle: {
+                                fontSize: function (value) {
+                                    return value * 1.2;  // 放大效果
+                                },
+                                fontWeight: 'bold',
+                                shadowBlur: 10,
+                                shadowColor: '#333',
+                            }
+                        },
+                    },
+                    data: {{result|safe}},
+                }]
+            }
+
+            // 使用配置项和数据显示图表
+            myChart.setOption(option);
+        </script>
+
+    {% endblock %}
+{% endblock %}

@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <div class="page-content">
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">品牌与类型维度分析</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a></li>
+                        <li class="breadcrumb-item active" aria-current="page">销售与评价关联分析</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-9 mx-auto">
+                <!-- 图表1：不同品牌的销量和平均得分 -->
+                <h6 class="mb-0 text-uppercase">不同品牌的销量和平均得分分布</h6>
+                <hr/>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="chart_brand_sales" style="height: 400px;"></div>
+                    </div>
+                </div>
+
+                <!-- 图表2：多价位段（0-6000元）销量与好评率分析 -->
+                <h6 class="mb-0 text-uppercase">不同价位段销量与好评率对比</h6>
+                <hr/>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="chart_multi_price" style="height: 400px;"></div>
+                    </div>
+                </div>
+
+                <!-- 图表3：品牌口碑稳定性 -->
+                <h6 class="mb-0 text-uppercase">品牌口碑稳定性（好评率与差评数）</h6>
+                <hr/>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="chart_brand_reputation" style="height: 400px;"></div>
+                    </div>
+                </div>
+
+                <!-- 图表4：销量与好评率关系 -->
+                <h6 class="mb-0 text-uppercase">品牌销量与好评率的关系</h6>
+                <hr/>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="chart_sales_rate" style="height: 400px;"></div>
+                    </div>
+                </div>
+
+                <!-- 图表5：不同品牌+类型的销量对比 -->
+                <h6 class="mb-0 text-uppercase">不同品牌+类型的销量对比</h6>
+                <hr/>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="chart_brand_type_sales" style="height: 400px;"></div>
+                    </div>
+                </div>
+
+                <!-- 图表6：不同类型的好评率对比 -->
+                <h6 class="mb-0 text-uppercase">不同类型手机的好评率对比（按品牌）</h6>
+                <hr/>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="chart_type_good_rate" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block jss %}
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<script src="/static/assets/js/app.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ------------ 原有图表数据处理 ------------
+    // 图表1：不同品牌的销量和平均得分
+    var chartBrandSales = echarts.init(document.getElementById('chart_brand_sales'));
+    var brandSalesData = {{ brand_sales_data|safe }};
+    if (brandSalesData.length === 0) {
+        document.getElementById('chart_brand_sales').innerHTML = '<div style="text-align:center;line-height:400px;">暂无相关数据</div>';
+    } else {
+        chartBrandSales.setOption({
+            tooltip: {trigger: 'axis'},
+            legend: {data: ['总销量', '平均得分']},
+            xAxis: {type: 'category', data: brandSalesData.map(item => item.brand)},
+            yAxis: [
+                {type: 'value', name: '总销量'},
+                {type: 'value', name: '平均得分', max: 5}
+            ],
+            series: [
+                {name: '总销量', type: 'bar', data: brandSalesData.map(item => item.total_sales)},
+                {name: '平均得分', type: 'line', yAxisIndex: 1, data: brandSalesData.map(item => item.avg_score)}
+            ]
+        });
+    }
+
+    // ------------ 核心修改：多价位段（0-6000元）分析 ------------
+    // 图表2：各价位段销量与好评率（包含6000元以上）
+var chartMultiPrice = echarts.init(document.getElementById('chart_multi_price'));
+// 从后端获取多价位数据
+var multiPriceData = {{ multi_price_data|safe }};
+
+if (multiPriceData.length === 0) {
+    document.getElementById('chart_multi_price').innerHTML = '<div style="text-align:center;line-height:400px;">暂无价位段数据</div>';
+} else {
+    // 固定价位段顺序（与后端保持一致）
+    const priceRanges = [
+        "0-2000元",
+        "2000-4000元",
+        "4000-6000元",
+        "6000元以上"  // 新增6000元以上区间
+    ];
+
+    // 提取各价位段数据
+    const salesData = priceRanges.map(range => {
+        const item = multiPriceData.find(i => i.price_range === range);
+        return item ? item.sales : 0;
+    });
+    const rateData = priceRanges.map(range => {
+        const item = multiPriceData.find(i => i.price_range === range);
+        return item ? item.good_rate : 0;
+    });
+
+    chartMultiPrice.setOption({
+        tooltip: {trigger: 'axis'},
+        legend: {data: ['销量', '好评率(%)'], top: 0},
+        xAxis: {
+            type: 'category',
+            data: priceRanges,
+            name: '价格区间',
+            axisLabel: {interval: 0, rotate: 15} // 避免标签重叠
+        },
+        yAxis: [
+            {type: 'value', name: '销量', position: 'left'},
+            {type: 'value', name: '好评率(%)', max: 100, position: 'right'}
+        ],
+        series: [
+            {
+                name: '销量',
+                type: 'bar',
+                data: salesData,
+                itemStyle: {
+                    color: function(params) {
+                        // 价格越高颜色越深（4个区间对应4种颜色）
+                        const colors = ['#AED6F1', '#5DADE2', '#2980B9', '#0B3954'];
+                        return colors[params.dataIndex]; // 按索引匹配颜色
+                    },
+                    borderRadius: [4, 4, 0, 0]
+                }
+            },
+            {
+                name: '好评率(%)',
+                type: 'line',
+                yAxisIndex: 1,
+                symbol: 'circle',
+                symbolSize: 8,
+                lineStyle: {width: 3, color: '#27AE60'},
+                data: rateData,
+                itemStyle: {color: '#27AE60'} // 折线点颜色
+            }
+        ]
+    });
+}
+
+    // 图表3：品牌口碑稳定性
+    var chartBrandReputation = echarts.init(document.getElementById('chart_brand_reputation'));
+    var reputationData = {{ reputation_data|safe }};
+    if (reputationData.length === 0) {
+        document.getElementById('chart_brand_reputation').innerHTML = '<div style="text-align:center;line-height:400px;">暂无相关数据</div>';
+    } else {
+        chartBrandReputation.setOption({
+            tooltip: {trigger: 'axis'},
+            legend: {data: ['平均好评率(%)', '总差评数']},
+            xAxis: {type: 'category', data: reputationData.map(item => item.brand)},
+            yAxis: [
+                {type: 'value', name: '平均好评率(%)', max: 100},
+                {type: 'value', name: '总差评数', position: 'right'}
+            ],
+            series: [
+                {name: '平均好评率(%)', type: 'line', data: reputationData.map(item => item.avg_good_rate)},
+                {name: '总差评数', type: 'bar', yAxisIndex: 1, data: reputationData.map(item => item.total_poor)}
+            ]
+        });
+    }
+
+    // 图表4：销量与好评率关系
+    var chartSalesRate = echarts.init(document.getElementById('chart_sales_rate'));
+    var salesRateData = {{ sales_rate_data|safe }};
+    if (salesRateData.length === 0) {
+        document.getElementById('chart_sales_rate').innerHTML = '<div style="text-align:center;line-height:400px;">暂无相关数据</div>';
+    } else {
+        chartSalesRate.setOption({
+            tooltip: {trigger: 'item'},
+            xAxis: {type: 'category', data: salesRateData.map(item => item.brand)},
+            yAxis: [
+                {type: 'value', name: '总销量'},
+                {type: 'value', name: '平均好评率(%)', max: 100}
+            ],
+            series: [
+                {name: '总销量', type: 'line', data: salesRateData.map(item => item.sales)},
+                {name: '平均好评率(%)', type: 'line', yAxisIndex: 1, data: salesRateData.map(item => item.good_rate)}
+            ]
+        });
+    }
+
+    // 图表5：不同品牌+类型的销量对比
+    const brandTypeData = {{ brand_type_data|safe }};
+    const chartBrandTypeSales = echarts.init(document.getElementById('chart_brand_type_sales'));
+    if (brandTypeData.length === 0) {
+        document.getElementById('chart_brand_type_sales').innerHTML = '<div style="text-align:center;line-height:400px;">暂无品牌+类型数据</div>';
+    } else {
+        const brands = [...new Set(brandTypeData.map(item => item.brand))];
+        const types = ['旗舰机', '中端机', '入门机'];
+        const seriesData = types.map((type, index) => {
+            const colors = ['#FF6347', '#4682B4', '#3CB371'];
+            return {
+                name: type,
+                type: 'bar',
+                stack: 'total',
+                itemStyle: {color: colors[index]},
+                data: brands.map(brand => {
+                    const item = brandTypeData.find(i => i.brand === brand && i.type === type);
+                    return item ? item.sales : 0;
+                })
+            };
+        });
+
+        chartBrandTypeSales.setOption({
+            tooltip: {trigger: 'axis', axisPointer: {type: 'shadow'}},
+            legend: {data: types, top: 0},
+            xAxis: {type: 'category', data: brands, name: '品牌'},
+            yAxis: {type: 'value', name: '销量'},
+            series: seriesData
+        });
+    }
+
+    // 图表6：不同类型的好评率对比
+    const chartTypeGoodRate = echarts.init(document.getElementById('chart_type_good_rate'));
+    if (brandTypeData.length === 0) {
+        document.getElementById('chart_type_good_rate').innerHTML = '<div style="text-align:center;line-height:400px;">暂无品牌+类型数据</div>';
+    } else {
+        const brands = [...new Set(brandTypeData.map(item => item.brand))];
+        const types = ['旗舰机', '中端机', '入门机'];
+        const seriesData = brands.map((brand, index) => {
+            const colors = ['#FFA500', '#8A2BE2', '#00CED1', '#FF69B4', '#228B22'];
+            return {
+                name: brand,
+                type: 'line',
+                symbol: 'circle',
+                lineStyle: {width: 2},
+                itemStyle: {color: colors[index % colors.length]},
+                data: types.map(type => {
+                    const item = brandTypeData.find(i => i.brand === brand && i.type === type);
+                    return item ? item.good_rate : 0;
+                })
+            };
+        });
+
+        chartTypeGoodRate.setOption({
+            tooltip: {trigger: 'axis'},
+            legend: {data: brands, top: 0, width: '90%', left: '5%', textStyle: {fontSize: 12}},
+            xAxis: {type: 'category', data: types, name: '手机类型'},
+            yAxis: {type: 'value', name: '好评率(%)', max: 100, min: 50},
+            series: seriesData
+        });
+    }
+
+    // 窗口大小适配
+    window.addEventListener('resize', function() {
+        chartBrandSales.resize();
+        chartMultiPrice.resize();
+        chartBrandReputation.resize();
+        chartSalesRate.resize();
+        chartBrandTypeSales.resize();
+        chartTypeGoodRate.resize();
+    });
+});
+</script>
+{% endblock %}
